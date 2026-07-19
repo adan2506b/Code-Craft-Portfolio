@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>INSANE — Interactive Portfolio</title>
+  <meta name="description" content="Interactive portfolio built with HTML, CSS and vanilla JS" />
+  <style>
+    :root{
+      --bg:#ffffff; --card:#f7f9fc; --text:#0b1220; --muted:#556; --accent:#0066ff; --glass:rgba(255,255,255,0.6);
+      --radius:12px; --gap:1.25rem; --maxw:1100px;
+    }
+    [data-theme="dark"]{
+      --bg:#071022; --card:#0b1624; --text:#e6eef8; --muted:#9fb3d6; --accent:#66a3ff; --glass:rgba(255,255,255,0.03);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;
+      background:linear-gradient(180deg,var(--bg),color-mix(in srgb, var(--bg) 90%, #f0f6ff 10%));
+      color:var(--text); -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+      line-height:1.45; padding:2rem;
+      display:flex; justify-content:center;
+    }
+    .wrap{width:100%; max-width:var(--maxw);}
+
+    /* Header */
+    header{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:1.5rem}
+    .brand{display:flex;align-items:center;gap:.75rem}
+    .logo{
+      width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,var(--accent),#00c2ff);
+      display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:18px;box-shadow:0 6px 18px rgba(2,6,23,0.12);
+    }
+    h1{font-size:1.1rem;margin:0}
+    .nav-actions{display:flex;gap:.5rem;align-items:center}
+    .btn{
+      background:var(--accent); color:white; border:0;padding:.55rem .8rem;border-radius:10px;cursor:pointer;font-weight:600;
+      text-decoration:none; display:inline-flex;align-items:center;gap:.5rem;
+    }
+    .icon-btn{background:transparent;border:1px solid color-mix(in srgb,var(--text) 12%, transparent);padding:.45rem;border-radius:10px;cursor:pointer;color:var(--text)}
+    .small{font-size:.9rem;color:var(--muted)}
+
+    /* Hero */
+    .hero{display:grid;grid-template-columns:1fr 320px;gap:1.5rem;align-items:center;margin-bottom:1.5rem}
+    .intro h2{margin:0 0 .5rem 0;font-size:1.6rem}
+    .intro p{margin:0 0 1rem;color:var(--muted)}
+    .hero-card{
+      background:var(--card); padding:1rem;border-radius:var(--radius);box-shadow:0 8px 30px rgba(2,6,23,0.06);
+      display:flex;flex-direction:column;gap:.6rem;align-items:center;text-align:center;
+    }
+    .avatar{width:120px;height:120px;border-radius:16px;background:linear-gradient(180deg,#fff, #f0f6ff);display:block;overflow:hidden}
+    .avatar img{width:100%;height:100%;object-fit:cover;display:block}
+
+    /* Projects grid */
+    #projects{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--gap);margin-bottom:1.5rem}
+    .card{background:var(--card);padding:1rem;border-radius:12px;transition:transform .25s,box-shadow .25s;cursor:pointer;display:flex;flex-direction:column;gap:.6rem}
+    .card:hover{transform:translateY(-8px);box-shadow:0 18px 40px rgba(2,6,23,0.12)}
+    .card img{width:100%;height:140px;object-fit:cover;border-radius:8px}
+    .tags{display:flex;gap:.4rem;flex-wrap:wrap}
+    .tag{font-size:.75rem;padding:.25rem .45rem;border-radius:999px;background:color-mix(in srgb,var(--text) 6%, transparent);color:var(--muted)}
+
+    /* Modal */
+    .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:2rem;z-index:60}
+    .modal.show{display:flex}
+    .modal-backdrop{position:absolute;inset:0;background:linear-gradient(180deg,rgba(2,6,23,0.45),rgba(2,6,23,0.6));backdrop-filter:blur(4px)}
+    .modal-panel{position:relative;background:var(--card);padding:1.25rem;border-radius:12px;max-width:900px;width:100%;z-index:10;box-shadow:0 30px 80px rgba(2,6,23,0.5)}
+    .modal-panel h3{margin-top:0}
+    .close-btn{position:absolute;right:12px;top:12px;border:0;background:transparent;color:var(--muted);cursor:pointer;font-size:1rem}
+
+    /* Footer / contact */
+    footer{display:flex;justify-content:space-between;align-items:center;gap:1rem;padding-top:1rem;border-top:1px dashed color-mix(in srgb,var(--text) 8%, transparent)}
+    .contact-form{display:flex;gap:.5rem;align-items:center}
+    input[type="email"]{padding:.5rem .6rem;border-radius:10px;border:1px solid color-mix(in srgb,var(--text) 8%, transparent);background:transparent;color:var(--text)}
+    input[type="submit"]{padding:.5rem .8rem;border-radius:10px;border:0;background:var(--accent);color:white;cursor:pointer}
+
+    /* Responsive */
+    @media (max-width:980px){
+      .hero{grid-template-columns:1fr}
+      #projects{grid-template-columns:repeat(2,1fr)}
+    }
+    @media (max-width:640px){
+      body{padding:1rem}
+      #projects{grid-template-columns:1fr}
+      .hero-card{order:2}
+      .intro{order:1}
+      .brand h1{font-size:1rem}
+    }
+
+    /* small utilities */
+    .muted{color:var(--muted)}
+    .center{display:flex;align-items:center;justify-content:center}
+    a.link{color:var(--accent);text-decoration:none;font-weight:600}
+  </style>
+</head>
+<body>
+  <div class="wrap" role="document">
+    <header>
+      <div class="brand" aria-hidden="false">
+        <div class="logo" aria-hidden="true">YN</div>
+        <div>
+          <h1>INSANE</h1>
+          <div class="small muted">Frontend Developer • HTML CSS JS</div>
+        </div>
+      </div>
+
+      <div class="nav-actions" role="navigation" aria-label="Main actions">
+        <button id="themeToggle" class="icon-btn" aria-pressed="false" title="Toggle theme">🌙</button>
+        <a class="btn" href="#contact">Contact</a>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="intro">
+          <h2 id="hero-title">Salam, main <strong>INSANE</strong> hoon</h2>
+          <p class="muted">Main interactive aur accessible front‑end experiences banata hoon sirf HTML, CSS aur JavaScript se.</p>
+          <p><a class="btn" href="#projects">Mere Projects Dekho</a></p>
+          <p class="small muted">Download CV: <a class="link" href="mailto:you@example.com?subject=CV Request">you@example.com</a></p>
+        </div>
+
+        <aside class="hero-card" aria-label="Profile card">
+          <div class="avatar" aria-hidden="true">
+            <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=800&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder" alt="Profile image">
+          </div>
+          <div><strong>Frontend Developer</strong></div>
+          <div class="small muted">React, Vue, or plain JS — I build UI that feels alive</div>
+          <div style="display:flex;gap:.5rem;margin-top:.6rem">
+            <a class="icon-btn" href="#" aria-label="GitHub">GH</a>
+            <a class="icon-btn" href="#" aria-label="LinkedIn">IN</a>
+          </div>
+        </aside>
+      </section>
+
+      <section id="projects" aria-labelledby="projects-title">
+        <h2 id="projects-title" class="small muted" style="margin-bottom:.6rem">Selected Projects</h2>
+        <!-- Project cards injected by JS -->
+      </section>
+
+      <!-- Modal -->
+      <div id="modal" class="modal" role="dialog" aria-modal="true" aria-hidden="true">
+        <div class="modal-backdrop" tabindex="-1"></div>
+        <div class="modal-panel" role="document" aria-labelledby="modal-title">
+          <button class="close-btn" id="modalClose" aria-label="Close modal">✕</button>
+          <div id="modalContent"></div>
+        </div>
+      </div>
+    </main>
+
+    <footer id="contact" aria-labelledby="contact-title">
+      <div>
+        <div id="contact-title" class="small muted">Get in touch</div>
+        <div class="small muted">Email: <a class="link" href="mailto:you@example.com">you@example.com</a></div>
+      </div>
+
+      <form class="contact-form" onsubmit="handleContact(event)" aria-label="Contact form">
+        <input id="emailInput" type="email" placeholder="Your email" required aria-label="Your email">
+        <input type="submit" value="Send">
+      </form>
+    </footer>
+  </div>
+
+  <script>
+    // Projects data
+    const projects = [
+      {
+        id:1,
+        title:"Interactive Portfolio",
+        img:"https://images.unsplash.com/photo-1521737604893-d14cc237f11d?q=80&w=1200&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder",
+        tags:["HTML","CSS","JS"],
+        desc:"A responsive portfolio with animations, theme toggle and accessible modal."
+      },
+      {
+        id:2,
+        title:"Landing Page UI",
+        img:"https://images.unsplash.com/photo-1509395176047-4a66953fd231?q=80&w=1200&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder",
+        tags:["UI","Design"],
+        desc:"High-conversion landing page with clear CTAs and responsive layout."
+      },
+      {
+        id:3,
+        title:"Mini E-shop (static)",
+        img:"https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=1200&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder",
+        tags:["JS","UX"],
+        desc:"Static shop with cart logic using localStorage and product filters."
+      },
+      {
+        id:4,
+        title:"Micro Learning App",
+        img:"https://images.unsplash.com/photo-1515879218367-8466d910aaa4?q=80&w=1200&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder",
+        tags:["JS","Accessibility"],
+        desc:"Small learning platform with quizzes and progress saved locally."
+      },
+      {
+        id:5,
+        title:"Animated Resume",
+        img:"https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=1200&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder",
+        tags:["CSS","Print"],
+        desc:"Interactive resume with print-friendly styles and timeline."
+      },
+      {
+        id:6,
+        title:"Data Viz Dashboard",
+        img:"https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=1200&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder",
+        tags:["JS","Charts"],
+        desc:"Lightweight dashboard with charts built using canvas and SVG."
+      }
+    ];
+
+    // Render project cards
+    const projectsEl = document.getElementById('projects');
+    function renderProjects(){
+      projectsEl.innerHTML = '';
+      const grid = document.createElement('div');
+      grid.style.display = 'grid';
+      grid.style.gridTemplateColumns = 'repeat(3,1fr)';
+      grid.style.gap = '1.25rem';
+      grid.id = 'projectsGrid';
+      projects.forEach(p=>{
+        const card = document.createElement('article');
+        card.className = 'card';
+        card.tabIndex = 0;
+        card.setAttribute('role','button');
+        card.setAttribute('aria-pressed','false');
+        card.innerHTML = `
+          <img loading="lazy" src="${p.img}" alt="${p.title}">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <h3 style="margin:.4rem 0 0 0;font-size:1rem">${p.title}</h3>
+            <div class="small muted">${p.tags.join(' • ')}</div>
+          </div>
+          <p class="muted" style="margin:0.5rem 0 0 0">${p.desc}</p>
+        `;
+        card.addEventListener('click',()=> openModal(p));
+        card.addEventListener('keydown', (e)=> { if(e.key === 'Enter' || e.key === ' ') openModal(p) });
+        grid.appendChild(card);
+      });
+      projectsEl.appendChild(grid);
+    }
+    renderProjects();
+
+    // Modal logic with focus trap
+    const modal = document.getElementById('modal');
+    const modalContent = document.getElementById('modalContent');
+    const modalClose = document.getElementById('modalClose');
+    let lastFocused = null;
+
+    function openModal(project){
+      lastFocused = document.activeElement;
+      modalContent.innerHTML = `
+        <h3 id="modal-title">${project.title}</h3>
+        <img src="${project.img}" alt="${project.title}" style="width:100%;height:260px;object-fit:cover;border-radius:8px;margin:8px 0">
+        <p class="muted">${project.desc}</p>
+        <p><strong>Tech:</strong> ${project.tags.join(', ')}</p>
+        <p style="margin-top:.6rem"><a class="link" href="#" onclick="return false">View live</a> • <a class="link" href="#" onclick="return false">Source</a></p>
+      `;
+      modal.classList.add('show');
+      modal.setAttribute('aria-hidden','false');
+      modalClose.focus();
+      document.body.style.overflow = 'hidden';
+      trapFocus(modal);
+    }
+
+    function closeModal(){
+      modal.classList.remove('show');
+      modal.setAttribute('aria-hidden','true');
+      modalContent.innerHTML = '';
+      document.body.style.overflow = '';
+      if(lastFocused) lastFocused.focus();
+    }
+
+    modalClose.addEventListener('click', closeModal);
+    modal.querySelector('.modal-backdrop').addEventListener('click', closeModal);
+    document.addEventListener('keydown', (e)=> { if(e.key === 'Escape') closeModal(); });
+
+    // Simple focus trap for modal
+    function trapFocus(container){
+      const focusable = container.querySelectorAll('a, button, input, textarea, [tabindex]:not([tabindex="-1"])');
+      if(!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length -1];
+      function handle(e){
+        if(e.key !== 'Tab') return;
+        if(e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
+        else if(!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
+      }
+      container.addEventListener('keydown', handle);
+      // remove listener when modal closes
+      const observer = new MutationObserver(()=> {
+        if(container.getAttribute('aria-hidden') === 'true'){
+          container.removeEventListener('keydown', handle);
+          observer.disconnect();
+        }
+      });
+      observer.observe(container, {attributes:true});
+    }
+
+    // Theme toggle
+    const themeToggle = document.getElementById('themeToggle');
+    const savedTheme = localStorage.getItem('theme') || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    themeToggle.setAttribute('aria-pressed', savedTheme === 'dark');
+    themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+
+    themeToggle.addEventListener('click', ()=>{
+      const cur = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', cur);
+      localStorage.setItem('theme', cur);
+      themeToggle.setAttribute('aria-pressed', cur === 'dark');
+      themeToggle.textContent = cur === 'dark' ? '☀️' : '🌙';
+    });
+
+    // Simple contact handler
+    function handleContact(e){
+      e.preventDefault();
+      const email = document.getElementById('emailInput').value.trim();
+      if(!email) return alert('Please enter your email');
+      // mailto fallback
+      window.location.href = `mailto:you@example.com?subject=Contact from ${encodeURIComponent(email)}&body=Hi, I want to connect.`;
+    }
+
+    // Intersection Observer for subtle reveal
+    const io = new IntersectionObserver((entries)=>{
+      entries.forEach(ent=>{
+        if(ent.isIntersecting) ent.target.style.transform = 'translateY(0)', ent.target.style.opacity = '1';
+      });
+    }, {threshold:0.12});
+    document.querySelectorAll('.card').forEach(c=>{
+      c.style.transform = 'translateY(12px)'; c.style.opacity = '0'; c.style.transition = 'all .6s cubic-bezier(.2,.9,.2,1)';
+      io.observe(c);
+    });
+
+    // Accessibility: skip to content on load focus
+    window.addEventListener('load', ()=> {
+      const firstHeading = document.getElementById('hero-title');
+      if(firstHeading) firstHeading.setAttribute('tabindex','-1');
+    });
+  </script>
+</body>
+</html>
